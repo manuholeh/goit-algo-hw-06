@@ -14,8 +14,8 @@ class Name(Field):
 class Phone(Field):
     def __init__(self, value):
         value_str = str(value)
-        if len(value_str) != 10:
-            raise ValueError("Номер повинен складатись з 10 цифр")
+        if len(value_str) != 10 or not value_str.isdigit():
+            raise ValueError("Перевірте правильність введення номеру")
         super().__init__(value_str)
 
 class Record:
@@ -24,14 +24,18 @@ class Record:
         self.phones = []
 
     def add_phone(self, phone):
-        self.phones.append(Phone(phone))
+            self.phones.append(Phone(phone))
 
     def remove_phone(self, phone):
-        self.phones = [p for p in self.phones if p.value != phone]
+        p = self.find_phone(phone)
+        if p:
+            self.phones.remove(p)
+        else:
+            raise ValueError("Номер не знайдено")
 
     def edit_phone(self, old_phone, new_phone):
-        if old_phone and new_phone:
-            self.phones = [p for p in self.phones if p.value != old_phone]
+        if self.find_phone(old_phone) and new_phone:
+            self.remove_phone(old_phone)
             self.add_phone(new_phone)
         else:
             raise ValueError("Перевірте правильність даних")
@@ -59,7 +63,7 @@ class AddressBook(UserDict):
             self.data[record.name.value] = record
 
     def find(self, name):
-        return self.data.get(name,"Not found")
+        return self.data.get(name,None)
 
     def delete(self, name):
         if name in self.data:
@@ -80,6 +84,7 @@ book = AddressBook()
 # Створення запису для John
 john_record = Record("John")
 john_record.add_phone("1234567890")
+#john_record.remove_phone("123456789")
 john_record.add_phone("5555555555")
 
 # Додавання запису John до адресної книги
